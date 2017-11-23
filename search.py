@@ -28,6 +28,7 @@ EAST = Directions.EAST
 WEST = Directions.WEST
 STOP = Directions.STOP
 
+
 class SearchProblem:
     """
     This class outlines the structure of a search problem, but doesn't implement
@@ -75,7 +76,24 @@ def tinyMazeSearch(problem):
 
     s = Directions.SOUTH
     w = Directions.WEST
-    return  [s, s, w, s, w, w, s, w]
+    return [s, s, w, s, w, w, s, w]
+
+
+def inStack(successor, s, name):
+    list = []
+
+    if name == "ucs" or name == "astar":
+        list = s.heap
+    else:
+        list = s.list
+
+    if name == "ucs" or name == "astar":
+        list = s.heap
+
+    for element in list:
+        if element[0] == successor[0]:
+            return True
+    return False
 
 
 def firstSearchSolution(problem, frontier, name):
@@ -86,16 +104,16 @@ def firstSearchSolution(problem, frontier, name):
     visited = []
     parentStateMap = dict()
     parentActionMap = dict()
+    parentCostMap = dict()
 
     # print start_state
 
     if problem.isGoalState(start_state):
         return solution
-    if name=="dfs" or name=="bfs":
-
+    if name == "dfs" or name == "bfs":
         s.push([start_state, STOP, 0])
-    elif name =="ucs" or name =="astar":
-            s.push([start_state,STOP,0],0 )
+    elif name == "ucs" or name == "astar":
+        s.push([start_state, STOP, 0], 0)
 
     while not s.isEmpty():
         current = s.pop()
@@ -103,6 +121,7 @@ def firstSearchSolution(problem, frontier, name):
         current_action = current[1]
         current_cost = current[2]
 
+        # print "current cost is: ", current_cost
         parentActionMap[current_state] = current_action
 
         if current_state not in visited:
@@ -114,21 +133,27 @@ def firstSearchSolution(problem, frontier, name):
                 inOrderSolution = list(reversed(solution))
                 return (inOrderSolution)
 
-
             visited.append(current_state)
             successors = problem.getSuccessors(current_state)
-            # print "successors are ", successors
+            total_cost = 0
             for successor in successors:
-                if successor[0] not in visited:
-                    # print "current_state ", current_state, "successor", successor[0], "current_action", current_action
-                    if name=="dfs" or name=="bfs":
-                        s.push([successor[0], successor[1], current_cost + 1])
-                    elif name =="ucs":
-                        s.push([successor[0], successor[1]], successor[2])
-                    elif name == "astar":
-                        s.push([successor[0], successor[1], successor[2]], successor[2] + nullHeuristic(successor[0], problem))
-                    parentStateMap[successor[0]] = current_state
 
+                if not inStack(successor, s, name) and successor[0] not in visited:
+                    if name == "dfs" or name == "bfs":
+                        s.push([successor[0], successor[1], current_cost + 1])
+                        total_cost = current_cost + 1
+                    elif name == "ucs":
+                        s.push([successor[0], successor[1] , successor[2]], successor[2])
+                        total_cost = current_cost + successor[2]
+                    elif name == "astar":
+                        s.push([successor[0], successor[1], successor[2]],
+                               successor[2] + nullHeuristic(successor[0], problem))
+                        total_cost = current_cost + successor[2] + nullHeuristic(successor[0], problem)
+
+                    if not parentCostMap.has_key(successor[0]) or parentCostMap[
+                        successor[0]] >= total_cost or name == "dfs":
+                        parentStateMap[successor[0]] = current_state
+                        parentCostMap[successor[0]] = total_cost
     return []
 
 
@@ -147,14 +172,14 @@ def depthFirstSearch(problem):
     "*** YOUR CODE HERE ***"
     util.raiseNotDefined()
 
+
 def breadthFirstSearch(problem):
     return firstSearchSolution(problem, Queue(), "bfs")
-
-
 
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
     util.raiseNotDefined()
+
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
@@ -162,12 +187,14 @@ def uniformCostSearch(problem):
     return firstSearchSolution(problem, PriorityQueue(), "ucs")
     util.raiseNotDefined()
 
+
 def nullHeuristic(state, problem=None):
     """
     A heuristic function estimates the cost from the current state to the nearest
     goal in the provided SearchProblem.  This heuristic is trivial.
     """
     return 0
+
 
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
