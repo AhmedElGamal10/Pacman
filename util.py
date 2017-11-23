@@ -148,6 +148,13 @@ class Stack:
         "Returns true if the stack is empty"
         return len(self.list) == 0
 
+    def __contains__(self, x):
+        for a in self.list:
+            if a == x:
+                return True
+        return False
+
+
 class Queue:
     "A container with a first-in-first-out (FIFO) queuing policy."
     def __init__(self):
@@ -167,6 +174,13 @@ class Queue:
     def isEmpty(self):
         "Returns true if the queue is empty"
         return len(self.list) == 0
+
+    def __contains__(self, x):
+        for a in self.list:
+            if a == x:
+                return True
+        return False
+
 
 class PriorityQueue:
     """

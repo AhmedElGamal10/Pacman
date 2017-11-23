@@ -18,6 +18,8 @@ Pacman agents (in searchAgents.py).
 """
 
 import util
+from util import Stack
+from game import Directions
 
 class SearchProblem:
     """
@@ -67,20 +69,33 @@ def tinyMazeSearch(problem):
     Returns a sequence of moves that solves tinyMaze.  For any other maze, the
     sequence of moves will be incorrect, so only use this for tinyMaze.
     """
-    from game import Directions
+
     s = Directions.SOUTH
     w = Directions.WEST
     return  [s, s, w, s, w, w, s, w]
 
+
 def depthFirstSearch(problem):
-    from util import Stack
-    visited, stack = set(), [start]
-    while stack:
-        vertex = stack.pop()
-        if vertex not in visited:
-            visited.add(vertex)
-            stack.extend(graph[vertex] - visited)
-    return visited
+    s = util.Stack()
+    start_state = problem.getStartState()
+    s.push(start_state)
+
+    visited = []
+    while(not s.isEmpty()):
+        current_state = s.pop()
+
+        if current_state not in visited:
+            if problem.isGoalState(current_state):
+                "return the path array"
+                return []
+
+        visited.append(current_state)
+        for successor in problem.getSuccessors(current_state):
+            if successor not in s and successor not in visited:
+                s.push(successor)
+
+        return []
+
     """
     Search the deepest nodes in the search tree first.
 
@@ -98,6 +113,26 @@ def depthFirstSearch(problem):
     util.raiseNotDefined()
 
 def breadthFirstSearch(problem):
+    s = util.Queue()
+    start_state = problem.getStartState()
+    s.push(start_state)
+
+    visited = []
+    while(not s.isEmpty()):
+        current_state = s.pop()
+
+        if current_state not in visited:
+            if problem.isGoalState(current_state):
+                "return the path array"
+                return []
+
+        visited.append(current_state)
+        for successor in problem.getSuccessors(current_state):
+            if successor not in s and successor not in visited:
+                s.push(successor)
+
+        return []
+
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
     util.raiseNotDefined()
