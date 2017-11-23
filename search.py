@@ -19,7 +19,14 @@ Pacman agents (in searchAgents.py).
 
 import util
 from util import Stack
+from util import Queue
 from game import Directions
+
+NORTH = Directions.NORTH
+SOUTH = Directions.SOUTH
+EAST = Directions.EAST
+WEST = Directions.WEST
+STOP = Directions.STOP
 
 class SearchProblem:
     """
@@ -75,27 +82,93 @@ def tinyMazeSearch(problem):
     return  [s, s, w, s, w, w, s, w]
 
 
-def depthFirstSearch(problem):
-    s = util.Stack()
-    start_state = problem.getStartState()
-    s.push(start_state)
+def graphSearch(problem, frontier):
+    print "Start:", problem.getStartState()
+    print "Is the start a goal?", problem.isGoalState(problem.getStartState())
+    print "Start's successors:", problem.getSuccessors(problem.getStartState())
 
+    explored = []
+    frontier.push([(problem.getStartState(), "Stop", 0)])
+
+    while not frontier.isEmpty():
+        # print "frontier: ", frontier.heap
+        path = frontier.pop()
+        print "path len: ", len(path)
+        print "path: ", path
+
+        s = path[len(path) - 1]
+        s = s[0]
+        # print "s: ", s
+        if problem.isGoalState(s):
+            # print "FOUND SOLUTION: ", [x[1] for x in path]
+            return [x[1] for x in path][1:]
+
+        if s not in explored:
+            explored.append(s)
+            # print "EXPLORING: ", s
+
+            for successor in problem.getSuccessors(s):
+                # print "SUCCESSOR: ", successor
+                if successor[0] not in explored:
+                    successorPath = path[:]
+                    successorPath.append(successor)
+                    # print "successorPath: ", successorPath
+                    frontier.push(successorPath)
+                    # else:
+                    # print successor[0], " IS ALREADY EXPLORED!!"
+
+    return []
+
+
+def firstSearchSolution(problem, frontier):
+    s = frontier
+    start_state = problem.getStartState()
+
+    solution = []
     visited = []
-    while(not s.isEmpty()):
-        current_state = s.pop()
+    parentStateMap = dict()
+    parentActionMap = dict()
+
+    print start_state
+
+    if problem.isGoalState(start_state):
+        return solution
+
+    s.push([start_state, STOP])
+
+    while not s.isEmpty():
+        current = s.pop()
+        current_state = current[0]
+        current_action = current[1]
+
+        parentActionMap[current_state] = current_action
+
+        solution.append(current_action)
 
         if current_state not in visited:
             if problem.isGoalState(current_state):
-                "return the path array"
-                return []
+                solution = []
+                while (current_state != start_state):
+                    solution.append([parentActionMap[current_state]][0])
+                    current_state = parentStateMap[current_state]
+                inOrderSolution = list(reversed(solution))
+                return (inOrderSolution)
 
-        visited.append(current_state)
-        for successor in problem.getSuccessors(current_state):
-            if successor not in s and successor not in visited:
-                s.push(successor)
 
-        return []
+            visited.append(current_state)
+            successors = problem.getSuccessors(current_state)
+            print "successors are ", successors
+            for successor in successors:
+                if successor not in s and successor[0] not in visited:
+                    print "current_state ", current_state, "successor", successor[0], "current_action", current_action
+                    s.push([successor[0], successor[1]])
+                    parentStateMap[successor[0]] = current_state
 
+    return []
+
+
+def depthFirstSearch(problem):
+    return firstSearchSolution(problem, Stack())
     """
     Search the deepest nodes in the search tree first.
 
@@ -113,25 +186,7 @@ def depthFirstSearch(problem):
     util.raiseNotDefined()
 
 def breadthFirstSearch(problem):
-    s = util.Queue()
-    start_state = problem.getStartState()
-    s.push(start_state)
-
-    visited = []
-    while(not s.isEmpty()):
-        current_state = s.pop()
-
-        if current_state not in visited:
-            if problem.isGoalState(current_state):
-                "return the path array"
-                return []
-
-        visited.append(current_state)
-        for successor in problem.getSuccessors(current_state):
-            if successor not in s and successor not in visited:
-                s.push(successor)
-
-        return []
+    return firstSearchSolution(problem, Queue())
 
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
