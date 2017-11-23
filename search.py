@@ -140,15 +140,14 @@ def firstSearchSolution(problem, frontier, name):
 
                 if not inStack(successor, s, name) and successor[0] not in visited:
                     if name == "dfs" or name == "bfs":
-                        s.push([successor[0], successor[1], current_cost + 1])
                         total_cost = current_cost + 1
+                        s.push([successor[0], successor[1], total_cost])
                     elif name == "ucs":
-                        s.push([successor[0], successor[1] , successor[2]], successor[2])
                         total_cost = current_cost + successor[2]
+                        s.push([successor[0], successor[1], total_cost], total_cost)
                     elif name == "astar":
-                        s.push([successor[0], successor[1], successor[2]],
-                               successor[2] + nullHeuristic(successor[0], problem))
                         total_cost = current_cost + successor[2] + nullHeuristic(successor[0], problem)
+                        s.push([successor[0], successor[1], total_cost], total_cost)
 
                     if not parentCostMap.has_key(successor[0]) or parentCostMap[
                         successor[0]] >= total_cost or name == "dfs":
