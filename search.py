@@ -105,8 +105,6 @@ def firstSearchSolution(problem, frontier):
 
         parentActionMap[current_state] = current_action
 
-        solution.append(current_action)
-
         if current_state not in visited:
             if problem.isGoalState(current_state):
                 solution = []
